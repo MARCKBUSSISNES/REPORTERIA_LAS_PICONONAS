@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MarckBusiness Analytics - Producción</title>
+  <style>
+    :root{
+      --blue:#1f73b9;
+      --blue2:#165e9a;
+      --blue3:#0e3e66;
+      --bg:#eef3f8;
+      --panel:#ffffff;
+      --line:#d7e0ea;
+      --text:#102235;
+      --muted:#627488;
+      --soft:#f6f9fc;
+      --ok:#e8f7ef;
+      --warn:#fff4dd;
+      --bad:#fde8eb;
+      --shadow:0 10px 28px rgba(15,40,70,.08);
+      --radius:16px;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Segoe UI,Arial,sans-serif}
+    body{min-height:100vh}
+    .app{max-width:1600px;margin:0 auto;padding:14px}
+
+    .topbar{background:linear-gradient(180deg,var(--blue),var(--blue2));color:#fff;border-radius:14px 14px 0 0;box-shadow:var(--shadow);overflow:hidden}
+    .topbar-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.18)}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand-logo{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(255,255,255,.25)}
+    .brand-logo img{width:100%;height:100%;object-fit:contain}
+    .brand-title{font-size:24px;font-weight:700;line-height:1}
+    .brand-sub{font-size:12px;opacity:.9;margin-top:4px}
+
+    .ribbon{display:flex;overflow:auto;background:#f1f1f1;color:var(--text);border:1px solid #cfd6de;border-top:none;border-radius:0 0 14px 14px}
+    .group{min-width:260px;padding:10px 14px 8px;border-right:1px solid #d4dbe3;background:linear-gradient(180deg,#f8f9fb,#eceff3)}
+    .group:last-child{border-right:none}
+    .group-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
+    .nav-btn,.quick-btn{appearance:none;border:1px solid #cbd5df;background:linear-gradient(180deg,#fff,#eef3f7);border-radius:12px;padding:10px 10px;min-width:96px;cursor:pointer;color:var(--text);font-weight:600;box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
+    .nav-btn:hover,.quick-btn:hover{background:linear-gradient(180deg,#fff,#e6eef6)}
+    .nav-btn.active{border-color:var(--blue);background:linear-gradient(180deg,#eff7ff,#dbeeff)}
+    .iconbox{width:42px;height:34px;border-radius:10px;margin:0 auto 8px;background:linear-gradient(180deg,#edf3f9,#dce6f0);display:flex;align-items:center;justify-content:center;border:1px solid #c9d4df;color:var(--blue3)}
+    .iconbox svg{width:22px;height:22px;display:block}
+    .btn-label{display:block;text-align:center;font-size:12px}
+    .group-label{text-align:center;font-size:12px;color:var(--muted);font-weight:700;margin-top:8px}
+
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .content{margin-top:14px}
+    .section{display:none}
+    .section.active{display:block}
+    .section-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .section-title{font-size:20px;font-weight:700}
+    .section-tools{display:flex;gap:10px;flex-wrap:wrap}
+    .section-body{padding:14px}
+
+    .uploader{display:grid;grid-template-columns:1.3fr .7fr;gap:14px;margin-bottom:14px}
+    .drop{padding:16px;background:var(--soft);border:1px dashed #b7c7d8;border-radius:14px}
+    .drop input{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:#fff}
+    .mini-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .mini{padding:14px;border-radius:14px;background:var(--soft);border:1px solid var(--line)}
+    .mini .k{font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.06em}
+    .mini .v{font-size:18px;font-weight:800;margin-top:8px}
+
+    .filters{display:grid;grid-template-columns:1.2fr .8fr .8fr auto auto;gap:10px;margin-bottom:14px}
+    .field{display:flex;flex-direction:column;gap:6px}
+    .field label{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase}
+    .field input,.field select,.btn{padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--text)}
+    .btn{cursor:pointer;font-weight:700}
+    .btn.primary{background:linear-gradient(180deg,var(--blue),var(--blue2));color:#fff;border-color:var(--blue2)}
+
+    .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px}
+    .kpi{padding:16px;border-radius:16px;background:#fff;border:1px solid var(--line);box-shadow:var(--shadow)}
+    .kpi .k{font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700;letter-spacing:.06em}
+    .kpi .v{font-size:28px;font-weight:800;margin-top:8px}
+    .kpi .s{font-size:12px;color:var(--muted);margin-top:6px}
+
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .listbox{display:flex;flex-direction:column;gap:10px;max-height:420px;overflow:auto}
+    .listrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--soft)}
+    .name{font-weight:700}
+    .sub{font-size:12px;color:var(--muted);margin-top:4px}
+    .badge{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:700;border:1px solid #d3dde8;background:#fff}
+    .ok{background:var(--ok)} .warn{background:var(--warn)} .bad{background:var(--bad)}
+
+    .table-wrap{overflow:auto;border:1px solid var(--line);border-radius:14px;max-height:540px}
+    table{width:100%;border-collapse:collapse;min-width:760px;background:#fff}
+    th,td{padding:11px 10px;border-bottom:1px solid #e6edf4;font-size:13px;text-align:left}
+    th{position:sticky;top:0;background:#f4f7fb;z-index:1;font-size:11px;text-transform:uppercase;color:#506276}
+    tr:hover td{background:#fafcff}
+    .right{text-align:right}
+    .center{text-align:center}
+
+    .envios-layout{display:grid;grid-template-columns:380px 1fr;gap:14px}
+    .envio-list{display:flex;flex-direction:column;gap:10px;max-height:720px;overflow:auto}
+    .envio-item{padding:14px;border:1px solid var(--line);border-radius:14px;background:#fff;cursor:pointer}
+    .envio-item.active{border-color:var(--blue);background:#eef7ff}
+    .envio-item:hover{background:#f8fbff}
+    .envio-id{font-weight:800}
+    .envio-meta{font-size:12px;color:var(--muted);margin-top:5px;line-height:1.45}
+
+    .doc{border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden;box-shadow:var(--shadow)}
+    .doc-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;padding:18px;background:linear-gradient(180deg,var(--blue),var(--blue2));color:#fff}
+    .doc-brand{display:flex;gap:14px;align-items:center}
+    .doc-logo{width:82px;height:82px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid rgba(0,0,0,.1)}
+    .doc-logo img{width:100%;height:100%;object-fit:contain;padding:6px}
+    .doc-logo-fallback{color:var(--blue);font-weight:900;font-size:20px}
+    .doc-title{font-size:26px;font-weight:800;margin:0}
+    .doc-sub{font-size:13px;opacity:.95;margin-top:6px;line-height:1.45}
+    .doc-body{padding:16px}
+    .doc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+    .ibox{border:1px solid var(--line);background:var(--soft);border-radius:12px;padding:12px}
+    .ibox .k{font-size:11px;color:var(--muted);text-transform:uppercase;font-weight:700}
+    .ibox .v{font-size:15px;font-weight:800;margin-top:7px;line-height:1.35}
+    .doc-block{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:12px}
+    .doc-block h3{margin:0 0 10px;font-size:15px}
+    .doc-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+
+    .statusbar{padding:10px 14px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);background:#fafcff}
+    .empty{padding:30px 16px;text-align:center;color:var(--muted)}
+
+    .modal{position:fixed;inset:0;background:rgba(9,20,32,.55);display:none;align-items:center;justify-content:center;padding:24px;z-index:9999}
+    .modal.active{display:flex}
+    .modal-card{width:min(1100px,96vw);max-height:92vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.25)}
+    .modal-top{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);position:sticky;top:0;background:#fff;z-index:2}
+
+    @media (max-width:1200px){
+      .kpis{grid-template-columns:repeat(2,1fr)}
+      .grid-2,.uploader,.envios-layout{grid-template-columns:1fr}
+      .filters{grid-template-columns:1fr 1fr}
+      .doc-grid{grid-template-columns:1fr 1fr}
+    }
+    @media (max-width:760px){
+      .app{padding:8px}
+      .filters,.kpis,.mini-stats,.doc-grid{grid-template-columns:1fr}
+      .brand-title{font-size:19px}
+      .group{min-width:220px}
+    }
+    @media print{
+      body{background:#fff}
+      .topbar,.filters,.statusbar,.modal-top,.doc-actions,.uploader,.section-tools{display:none !important}
+      .app,.content,.panel,.section,.section.active,.doc,.doc-body{margin:0;padding:0;box-shadow:none;border:none}
+      .doc{border:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar-head">
+        <div class="brand">
+          <div class="brand-logo"><img src="LOGO1.png" alt="LOGO1" onerror="this.style.display='none';this.parentElement.innerHTML='MB';"></div>
+          <div>
+            <div class="brand-title">MarckBusiness Analytics</div>
+            <div class="brand-sub">Producción</div>
+          </div>
+        </div>
+        <div style="font-size:12px;opacity:.92">Vista rápida</div>
+      </div>
+      <div class="ribbon">
+        <div class="group">
+          <div class="group-actions">
+            <button class="nav-btn active" data-view="resumen">
+              <div class="iconbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5"/><path d="M10 19V9"/><path d="M16 19V12"/><path d="M22 19V3"/></svg></div>
+              <span class="btn-label">Resumen</span>
+            </button>
+            <button class="nav-btn" data-view="produccion">
+              <div class="iconbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V8l7-5 7 5v13"/></svg></div>
+              <span class="btn-label">Producción</span>
+            </button>
+            <button class="nav-btn" data-view="inventario">
+              <div class="iconbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/></svg></div>
+              <span class="btn-label">Inventario</span>
+            </button>
+            <button class="nav-btn" data-view="envios">
+              <div class="iconbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+              <span class="btn-label">Envíos</span>
+            </button>
+          </div>
+          <div class="group-label">Módulos</div>
+        </div>
+        <div class="group">
+          <div class="group-actions">
+            <button class="quick-btn" id="btnLoadDemo">
+              <div class="iconbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg></div>
+              <span class="btn-label">Cargar archivo</span>
+            </button>
+            <button class="quick-btn" id="btnLatestEnvio">
+              <div class="iconbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10"/><path d="M7 12h10"/><path d="M7 16h7"/></svg></div>
+              <span class="btn-label">Último envío</span>
+            </button>
+            <button class="quick-btn" id="btnPrintEnvio">
+              <div class="iconbox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 8V3h10v5"/><rect x="4" y="8" width="16" height="8" rx="2"/><path d="M7 16h10v5H7z"/></svg></div>
+              <span class="btn-label">Imprimir envío</span>
+            </button>
+          </div>
+          <div class="group-label">Acciones</div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+      <section class="panel uploader">
+        <div class="drop">
+          <div style="font-size:18px;font-weight:700;margin-bottom:8px">Backup</div>
+          <input type="file" id="fileInput" accept=".json" />
+        </div>
+        <div class="mini-stats">
+          <div class="mini"><div class="k">Archivo</div><div class="v" id="fileName">Sin cargar</div></div>
+          <div class="mini"><div class="k">Base</div><div class="v" id="dbName">-</div></div>
+          <div class="mini"><div class="k">Fecha</div><div class="v" id="fileDate">-</div></div>
+          <div class="mini"><div class="k">Estado</div><div class="v" id="fileState">Esperando</div></div>
+        </div>
+      </section>
+
+      <section class="panel" style="margin-bottom:14px">
+        <div class="section-body">
+          <div class="filters">
+            <div class="field">
+              <label>Buscar</label>
+              <input id="searchInput" type="text" placeholder="Producto, cliente, lote...">
+            </div>
+            <div class="field">
+              <label>Desde</label>
+              <input id="fromDate" type="date">
+            </div>
+            <div class="field">
+              <label>Hasta</label>
+              <input id="toDate" type="date">
+            </div>
+            <button class="btn primary" id="applyBtn">Aplicar</button>
+            <button class="btn" id="clearBtn">Limpiar</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-resumen" class="section active">
+        <div class="kpis">
+          <div class="kpi"><div class="k">Producción</div><div class="v" id="kpiProd">0</div><div class="s">Total producido</div></div>
+          <div class="kpi"><div class="k">Inventario</div><div class="v" id="kpiInv">0</div><div class="s">Existencia PT</div></div>
+          <div class="kpi"><div class="k">Envíos</div><div class="v" id="kpiEnv">0</div><div class="s">Registros</div></div>
+          <div class="kpi"><div class="k">Despachado</div><div class="v" id="kpiDesp">0</div><div class="s">Unidades enviadas</div></div>
+          <div class="kpi"><div class="k">Valor inventario</div><div class="v" id="kpiVal">Q0.00</div><div class="s">Costo total PT</div></div>
+        </div>
+
+        <div class="grid-2">
+          <section class="panel">
+            <div class="section-head"><div class="section-title">Top productos</div></div>
+            <div class="section-body"><div class="listbox" id="topProductos"></div></div>
+          </section>
+          <section class="panel">
+            <div class="section-head"><div class="section-title">Últimos envíos</div></div>
+            <div class="section-body"><div class="listbox" id="ultimosEnvios"></div></div>
+          </section>
+        </div>
+      </section>
+
+      <section id="view-produccion" class="section">
+        <section class="panel">
+          <div class="section-head"><div class="section-title">Producción</div></div>
+          <div class="section-body">
+            <div class="table-wrap"><table id="tblProduccion"></table></div>
+          </div>
+        </section>
+      </section>
+
+      <section id="view-inventario" class="section">
+        <section class="panel">
+          <div class="section-head"><div class="section-title">Inventario PT</div></div>
+          <div class="section-body">
+            <div class="table-wrap"><table id="tblInventario"></table></div>
+          </div>
+        </section>
+      </section>
+
+      <section id="view-envios" class="section">
+        <section class="panel">
+          <div class="section-head">
+            <div class="section-title">Envíos</div>
+            <div class="section-tools">
+              <button class="btn" id="btnOpenWindow">Abrir ventana</button>
+              <button class="btn primary" id="btnOpenModal">Ver grande</button>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="envios-layout">
+              <div class="envio-list" id="envioList"></div>
+              <div class="doc" id="envioDocWrap">
+                <div class="empty">Selecciona un envío</div>
+              </div>
+            </div>
+          </div>
+          <div class="statusbar" id="statusBar">Sin datos</div>
+        </section>
+      </section>
+    </div>
+  </div>
+
+  <div class="modal" id="envioModal">
+    <div class="modal-card">
+      <div class="modal-top">
+        <strong>Detalle de envío</strong>
+        <button class="btn" id="closeModal">Cerrar</button>
+      </div>
+      <div style="padding:16px" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const fmtInt = n => new Intl.NumberFormat('es-GT').format(Number(n||0));
+    const fmtQ = n => 'Q' + new Intl.NumberFormat('es-GT',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(n||0));
+    const toDateObj = v => {
+      if(!v) return null;
+      const d = new Date(v);
+      return isNaN(d) ? null : d;
+    };
+    const fmtDateTime = v => {
+      const d = toDateObj(v);
+      return d ? d.toLocaleString('es-GT') : '-';
+    };
+    const safe = v => (v===0 ? '0' : (v || '-'));
+    const sum = (arr, fn) => (arr||[]).reduce((a,x)=>a + Number(fn(x)||0), 0);
+
+    let RAW = null;
+    let DB = null;
+    let filtered = { producciones:[], inventarioPT:[], envios:[] };
+    let selectedEnvio = null;
+
+    const $ = id => document.getElementById(id);
+
+    function normalizeDb(obj){
+      if(!obj || typeof obj !== 'object') return null;
+      if(obj.keys && obj.keys.LAS_PICONAS_ERP_V2) return obj.keys.LAS_PICONAS_ERP_V2;
+      if(obj.LAS_PICONAS_ERP_V2) return obj.LAS_PICONAS_ERP_V2;
+      return obj;
+    }
+
+    function loadJsonContent(text, fileName='Backup'){
+      try{
+        RAW = JSON.parse(text);
+        DB = normalizeDb(RAW);
+        if(!DB) throw new Error('No se encontró base válida');
+        $('fileName').textContent = fileName;
+        $('dbName').textContent = RAW?.keys?.LAS_PICONAS_ERP_V2 ? 'LAS_PICONAS_ERP_V2' : 'Base detectada';
+        $('fileDate').textContent = RAW?.meta?.exportedAt ? fmtDateTime(RAW.meta.exportedAt) : '-';
+        $('fileState').textContent = 'Cargado';
+        applyFilters();
+      }catch(err){
+        console.error(err);
+        $('fileState').textContent = 'Error';
+        alert('No se pudo leer el backup.');
+      }
+    }
+
+    $('fileInput').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => loadJsonContent(ev.target.result, file.name);
+      reader.readAsText(file);
+    });
+
+    function applyFilters(){
+      if(!DB) return;
+      const q = $('searchInput').value.trim().toLowerCase();
+      const from = $('fromDate').value ? new Date($('fromDate').value + 'T00:00:00') : null;
+      const to = $('toDate').value ? new Date($('toDate').value + 'T23:59:59') : null;
+
+      const inRange = (dateValue) => {
+        const d = toDateObj(dateValue);
+        if(!d) return true;
+        if(from && d < from) return false;
+        if(to && d > to) return false;
+        return true;
+      };
+      const contains = (text) => !q || String(text||'').toLowerCase().includes(q);
+
+      filtered.producciones = (DB.producciones||[]).filter(x => {
+        const okText = [x.productoFinal,x.recetaNombre,x.lote,x.id,x.creadoPor].some(contains);
+        return okText && inRange(x.finalTs || x.fechaISO || x.ts);
+      });
+      filtered.inventarioPT = (DB.inventarioPT||[]).filter(x => {
+        const okText = [x.producto,x.lote].some(contains);
+        return okText && inRange(x.fechaISO || x.fecha || x.ts);
+      });
+      filtered.envios = (DB.envios||[]).filter(x => {
+        const lots = (x.itemsLotes||[]).map(i => i.lote).join(' ');
+        const prods = (x.items||[]).map(i => i.producto).join(' ');
+        const okText = [x.envioId,x.clienteNombre,x.vehiculoPiloto,x.vehiculoPlaca,lots,prods].some(contains);
+        return okText && inRange(x.fechaISO || x.ts);
+      }).sort((a,b)=>new Date(b.fechaISO||0)-new Date(a.fechaISO||0));
+
+      selectedEnvio = filtered.envios[0] || null;
+      renderAll();
+    }
+
+    function clearFilters(){
+      $('searchInput').value='';
+      $('fromDate').value='';
+      $('toDate').value='';
+      applyFilters();
+    }
+
+    function renderAll(){
+      renderResumen();
+      renderProduccion();
+      renderInventario();
+      renderEnvios();
+      $('statusBar').textContent = `Producción: ${filtered.producciones.length} · Inventario: ${filtered.inventarioPT.length} · Envíos: ${filtered.envios.length}`;
+    }
+
+    function renderResumen(){
+      const totalProd = sum(filtered.producciones, x => x.real);
+      const totalInv = sum(filtered.inventarioPT, x => x.cantidad);
+      const totalEnv = filtered.envios.length;
+      const totalDesp = sum(filtered.envios, e => sum(e.itemsLotes?.length ? e.itemsLotes : e.items, i => i.cantidad));
+      const valorInv = sum(filtered.inventarioPT, x => x.costoTotal || (Number(x.costoUnitario||0) * Number(x.cantidad||0)));
+
+      $('kpiProd').textContent = fmtInt(totalProd);
+      $('kpiInv').textContent = fmtInt(totalInv);
+      $('kpiEnv').textContent = fmtInt(totalEnv);
+      $('kpiDesp').textContent = fmtInt(totalDesp);
+      $('kpiVal').textContent = fmtQ(valorInv);
+
+      const topMap = {};
+      filtered.producciones.forEach(p => { topMap[p.productoFinal || p.recetaNombre || 'Sin nombre'] = (topMap[p.productoFinal || p.recetaNombre || 'Sin nombre'] || 0) + Number(p.real||0); });
+      const tops = Object.entries(topMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+      $('topProductos').innerHTML = tops.length ? tops.map(([name,val],idx)=>`
+        <div class="listrow">
+          <div><div class="name">${idx+1}. ${name}</div><div class="sub">Producción acumulada</div></div>
+          <div class="badge">${fmtInt(val)}</div>
+        </div>`).join('') : `<div class="empty">Sin datos</div>`;
+
+      $('ultimosEnvios').innerHTML = filtered.envios.slice(0,8).map(e=>`
+        <div class="listrow">
+          <div><div class="name">${safe(e.envioId)}</div><div class="sub">${safe(e.clienteNombre)} · ${fmtDateTime(e.fechaISO)}</div></div>
+          <div class="badge">${fmtInt(sum(e.itemsLotes?.length ? e.itemsLotes : e.items, i=>i.cantidad))}</div>
+        </div>`).join('') || `<div class="empty">Sin datos</div>`;
+    }
+
+    function renderProduccion(){
+      const rows = filtered.producciones.map(x=>`<tr>
+        <td>${safe(x.id)}</td>
+        <td>${safe(x.productoFinal || x.recetaNombre)}</td>
+        <td>${safe(x.lote)}</td>
+        <td>${fmtDateTime(x.finalTs || x.fechaISO || x.ts)}</td>
+        <td class="right">${fmtInt(x.real)}</td>
+        <td>${safe(x.unidad)}</td>
+        <td class="right">${fmtQ(x.costoTotalReal)}</td>
+        <td class="right">${fmtQ(x.costoUnitarioReal)}</td>
+      </tr>`).join('');
+      $('tblProduccion').innerHTML = `<thead><tr><th>ID</th><th>Producto</th><th>Lote</th><th>Fecha</th><th class="right">Cantidad</th><th>Unidad</th><th class="right">Costo total</th><th class="right">Costo unitario</th></tr></thead><tbody>${rows || `<tr><td colspan="8" class="center">Sin datos</td></tr>`}</tbody>`;
+    }
+
+    function renderInventario(){
+      const rows = filtered.inventarioPT.map(x=>{
+        const estadoClass = Number(x.cantidad||0) <= 0 ? 'bad' : 'ok';
+        const estadoText = Number(x.cantidad||0) <= 0 ? 'Agotado' : 'Disponible';
+        return `<tr>
+          <td>${safe(x.producto)}</td>
+          <td>${safe(x.lote)}</td>
+          <td>${fmtDateTime(x.fechaISO || x.fecha || x.ts)}</td>
+          <td class="right">${fmtInt(x.cantidad)}</td>
+          <td class="right">${fmtQ(x.costoUnitario)}</td>
+          <td class="right">${fmtQ(x.costoTotal)}</td>
+          <td class="center"><span class="badge ${estadoClass}">${estadoText}</span></td>
+        </tr>`;
+      }).join('');
+      $('tblInventario').innerHTML = `<thead><tr><th>Producto</th><th>Lote</th><th>Fecha</th><th class="right">Existencia</th><th class="right">Costo unitario</th><th class="right">Costo total</th><th class="center">Estado</th></tr></thead><tbody>${rows || `<tr><td colspan="7" class="center">Sin datos</td></tr>`}</tbody>`;
+    }
+
+    function renderEnvios(){
+      const list = $('envioList');
+      list.innerHTML = filtered.envios.map((e,idx)=>`
+        <div class="envio-item ${selectedEnvio && selectedEnvio.envioId===e.envioId ? 'active':''}" data-id="${String(e.envioId).replace(/"/g,'&quot;')}">
+          <div class="envio-id">${safe(e.envioId)}</div>
+          <div class="envio-meta">${safe(e.clienteNombre)}<br>${fmtDateTime(e.fechaISO)}</div>
+          <div class="envio-meta">Piloto: ${safe(e.vehiculoPiloto)} · Placa: ${safe(e.vehiculoPlaca)}</div>
+        </div>`).join('') || `<div class="empty">Sin envíos</div>`;
+      [...list.querySelectorAll('.envio-item')].forEach(el=>{
+        el.onclick = () => {
+          selectedEnvio = filtered.envios.find(x => String(x.envioId)===el.dataset.id) || null;
+          renderEnvios();
+        };
+      });
+      const wrap = $('envioDocWrap');
+      if(!selectedEnvio){ wrap.innerHTML = '<div class="empty">Selecciona un envío</div>'; return; }
+      const html = buildEnvioDoc(selectedEnvio);
+      wrap.innerHTML = html;
+    }
+
+    function buildEnvioDoc(e){
+      const lotes = e.itemsLotes?.length ? e.itemsLotes : [];
+      const items = e.items?.length ? e.items : [];
+      const rowsItems = items.map(i=>`<tr><td>${safe(i.producto)}</td><td class="right">${fmtInt(i.cantidad)}</td><td class="right">${fmtQ(i.precio)}</td><td class="right">${fmtQ(i.subtotal)}</td></tr>`).join('') || `<tr><td colspan="4" class="center">Sin items</td></tr>`;
+      const rowsLotes = lotes.map(i=>`<tr><td>${safe(i.producto)}</td><td>${safe(i.lote)}</td><td class="right">${fmtInt(i.cantidad)}</td><td class="right">${fmtQ(i.precio)}</td><td class="right">${fmtQ(i.subtotal)}</td></tr>`).join('') || `<tr><td colspan="5" class="center">Sin detalle por lote</td></tr>`;
+      return `
+        <div class="doc-head">
+          <div class="doc-brand">
+            <div class="doc-logo"><img src="LOGO1.png" alt="LOGO1" onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\'doc-logo-fallback\'>MB</div>'"></div>
+            <div>
+              <h2 class="doc-title">Envío ${safe(e.envioId)}</h2>
+              <div class="doc-sub">${safe(e.clienteNombre)} · ${fmtDateTime(e.fechaISO)}</div>
+            </div>
+          </div>
+          <div style="text-align:right;font-size:12px;line-height:1.6">
+            <div><strong>Total:</strong> ${fmtQ(e.total)}</div>
+            <div><strong>Items:</strong> ${fmtInt(sum(items, i=>i.cantidad))}</div>
+          </div>
+        </div>
+        <div class="doc-body">
+          <div class="doc-grid">
+            <div class="ibox"><div class="k">Cliente</div><div class="v">${safe(e.clienteNombre)}</div></div>
+            <div class="ibox"><div class="k">Teléfono</div><div class="v">${safe(e.clienteTelefono)}</div></div>
+            <div class="ibox"><div class="k">Piloto</div><div class="v">${safe(e.vehiculoPiloto)}</div></div>
+            <div class="ibox"><div class="k">Placa</div><div class="v">${safe(e.vehiculoPlaca)}</div></div>
+            <div class="ibox" style="grid-column:1/-1"><div class="k">Dirección</div><div class="v">${safe(e.clienteDireccion)}</div></div>
+          </div>
+          <div class="doc-block">
+            <h3>Productos</h3>
+            <div class="table-wrap"><table><thead><tr><th>Producto</th><th class="right">Cantidad</th><th class="right">Precio</th><th class="right">Subtotal</th></tr></thead><tbody>${rowsItems}</tbody></table></div>
+          </div>
+          <div class="doc-block">
+            <h3>Lotes</h3>
+            <div class="table-wrap"><table><thead><tr><th>Producto</th><th>Lote</th><th class="right">Cantidad</th><th class="right">Precio</th><th class="right">Subtotal</th></tr></thead><tbody>${rowsLotes}</tbody></table></div>
+          </div>
+          <div class="doc-block">
+            <h3>Observaciones</h3>
+            <div>${safe(e.obs)}</div>
+          </div>
+          <div class="doc-actions">
+            <button class="btn" onclick="openEnvioWindow()">Abrir ventana</button>
+            <button class="btn primary" onclick="openEnvioModal()">Ver grande</button>
+          </div>
+        </div>`;
+    }
+
+    function openEnvioWindow(){
+      if(!selectedEnvio) return;
+      const w = window.open('', '_blank', 'width=1100,height=850');
+      const doc = buildEnvioDoc(selectedEnvio);
+      w.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>${selectedEnvio.envioId}</title><style>${document.querySelector('style').innerHTML}</style></head><body><div class="app"><div class="doc">${doc}</div></div></body></html>`);
+      w.document.close();
+    }
+
+    function openEnvioModal(){
+      if(!selectedEnvio) return;
+      $('modalBody').innerHTML = `<div class="doc">${buildEnvioDoc(selectedEnvio)}</div>`;
+      $('envioModal').classList.add('active');
+    }
+
+    function switchView(view){
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelector('#view-' + view)?.classList.add('active');
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view===view));
+    }
+
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', ()=>switchView(btn.dataset.view)));
+    $('applyBtn').onclick = applyFilters;
+    $('clearBtn').onclick = clearFilters;
+    $('btnLoadDemo').onclick = () => $('fileInput').click();
+    $('btnLatestEnvio').onclick = () => { switchView('envios'); if(filtered.envios[0]) { selectedEnvio = filtered.envios[0]; renderEnvios(); } };
+    $('btnPrintEnvio').onclick = () => { if(!selectedEnvio) return; switchView('envios'); window.print(); };
+    $('btnOpenWindow').onclick = openEnvioWindow;
+    $('btnOpenModal').onclick = openEnvioModal;
+    $('closeModal').onclick = ()=> $('envioModal').classList.remove('active');
+    $('envioModal').addEventListener('click', e => { if(e.target.id==='envioModal') $('envioModal').classList.remove('active'); });
+    window.openEnvioWindow = openEnvioWindow;
+    window.openEnvioModal = openEnvioModal;
+
+    // Estado inicial con archivo de ejemplo si existe en la misma carpeta al abrir localmente desde este entorno no se auto-carga.
+  </script>
+</body>
+</html>
